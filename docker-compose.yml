@@ -1,0 +1,31 @@
+version: "3.3"
+services:
+  grafana:
+    image: grafana/grafana:latest
+    user: root
+    restart: always
+    volumes:
+      - ./grafana/data2:/var/lib/grafana
+      - ./grafana/blackbox-exporter_rev3.json:/var/lib/grafana/dashboards/blackbox-exporter_rev3.json
+      - ./grafana/dashboard.yml:/usr/share/grafana/conf/provisioning/dashboards/dashboard.yml
+      - ./grafana/datasource.yml:/usr/share/grafana/conf/provisioning/datasources/datasource.yml
+    ports:
+      - "8080:3000"
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/data:/data:rw
+    command: --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/data
+    ports:
+      - "9090:9090"
+  blackbox:
+    image: prom/blackbox-exporter:master
+    restart: always
+    volumes:
+      - ./blackbox/blackbox.yml:/etc/blackbox/blackbox.yml
+    command: --config.file=/etc/blackbox/blackbox.yml
+    # user: 1000:1000
+    ports:
+      - "9115:9115"

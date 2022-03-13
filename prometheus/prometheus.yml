@@ -1,0 +1,30 @@
+global:
+  scrape_interval:     15s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 15s # By default, scrape targets every 15 seconds.
+  # scrape_timeout is set to the global default (10s).
+
+scrape_configs:
+  - job_name: 'prometheus'
+    # Override the global default and scrape targets from this job every 5 seconds.
+    scrape_interval: 5s
+    static_configs:
+         - targets: ['localhost:9090']
+  - job_name: 'httpd'
+    scrape_interval: 60s
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - https://www.toopmarket.com/
+        - https://dl.toopmarket.com/api/5f609f4ec4f8374b1226d27b
+        - https://api.toopmarket.com/api/search/v1/search
+        - https://toopmarket.com/cat/car-games
+        # - https://example.com
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
